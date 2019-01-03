@@ -1,13 +1,37 @@
 language: java
 sudo: false
-script: "./gradlew check integrationTest"
 
 jdk:
   - oraclejdk8
 
-services:
-  - couchdb
+addons:
+  apt:
+    packages:
+      - docker-ce
 
+services:
+  - docker
+
+jobs:
+  include:
+  - stage: Build and Test on CouchDB 2.3.x
+    install:
+      - docker pull couchdb:2.3.0
+      - docker run -d -p 127.0.0.1:5984:5984 couchdb:2.3.0
+      - sleep 20
+    script: "./gradlew check integrationTest"
+  - stage: Build and Test on CouchDB 2.1.x
+      install:
+        - docker pull couchdb:2.1.2
+        - docker run -d -p 127.0.0.1:5984:5984 couchdb:2.1.2
+        - sleep 20
+      script: "./gradlew check integrationTest"
+  - stage: Build and Test on CouchDB 1.7.x
+    install:
+      - docker pull couchdb:1.7.2
+      - docker run -d -p 127.0.0.1:5984:5984 couchdb:1.7.2
+      - sleep 20
+    script: "./gradlew check integrationTest"
 before_install:
   - export TERM=dumb
 
